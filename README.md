@@ -1,3 +1,3 @@
 # sdk
-Coraline ESEDJI et Suvirtha Thayaharan 
+Coraline Esedji et Suvirtha Thayaharan 
 Groupe 12
