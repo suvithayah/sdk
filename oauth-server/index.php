@@ -1,5 +1,11 @@
 <?php
 
+/* 
+*
+* SERVER SIDE OAUTH
+*
+*/
+
 function read_file($filename)
 {
     if (!file_exists($filename)) {
@@ -17,7 +23,8 @@ function write_file($data, $filename)
     $data = array_map(fn($item) => serialize($item), $data);
     return file_put_contents($filename, implode(PHP_EOL, $data));
 }
-
+ 
+// Search in database file 
 function findInDb($criteria, $filename, $multiple = false)
 {
     $apps = read_file($filename);
@@ -31,31 +38,43 @@ function findInDb($criteria, $filename, $multiple = false)
     return !count($results) ? null : ($multiple ? $results : $results[0]);
 }
 
+// Search in app file
 function findApp($criteria)
 {
     return findInDb($criteria, './data/app.data');
 }
 
+// Search in code file
 function findCode($criteria)
 {
     return findInDb($criteria, './data/code.data');
 }
 
+// Search in token file
 function findToken($criteria)
 {
     return findInDb($criteria, './data/token.data');
 }
 
+// Search in code file
 function findAllCode($criteria)
 {
     return findInDb($criteria, './data/code.data', true);
 }
 
+// check if client authorized to connect via this provider
+function wasAppAuthorized($clientID)
+{
+    return findAllCode(['client_id' => $clientID]) !== null;
+}
+
+// bla bla fais chier 
 function findUser($criteria)
 {
     return ['user_id' => uniqid()];
 }
 
+// register client into app.data file - Provider Side
 function register()
 {
     ["name" => $name] = $_POST;
@@ -75,9 +94,11 @@ function register()
     echo json_encode(["client_id" => $clientID, "client_secret" => $clientSecret]);
 }
 
+// pop up request "yes" or "no" for confirm  auth with the provider - Provider Side
 function auth()
 {
     ["client_id" => $clientID, "state" => $state, "scope" => $scope] = $_GET;
+
     if (null === ($app = findApp(["client_id" => $clientID]))) throw new RuntimeException("{$clientID} not exists");
     if (wasAppAuthorized($clientID)) return handleAuth(true);
 
@@ -88,18 +109,17 @@ function auth()
     echo "</div>";
 }
 
-function wasAppAuthorized($clientID)
-{
-    return findAllCode(['client_id' => $clientID]) !== null;
-}
-
+// 
 function handleAuth($success)
 {
+  
     ["state" => $state, "client_id" => $clientID] = $_GET;
+    
 
     if (null === ($app = findApp(["client_id" => $clientID]))) throw new RuntimeException("{$clientID} not exists");
-
+   
     $queryParams = ["state" => $state];
+
     if ($success) {
         $code = uniqid();
         $queryParams["code"] = $code;
@@ -112,8 +132,14 @@ function handleAuth($success)
         ];
         write_file($codes, "./data/code.data");
     }
+   
     $redirectUrl = $app[$success ? "redirect_success" : "redirect_error"];
     $redirectUrl .= "?" . http_build_query($queryParams);
+    echo "<pre>";
+    print_r($queryParams);
+    print_r($redirectUrl);
+    die();
+
     header("Location: {$redirectUrl}");
     //echo("Location: {$redirectUrl}");
 }
@@ -177,6 +203,7 @@ function me()
     ]);
 }
 
+/* ROUTE */
 $route = strtok($_SERVER["REQUEST_URI"], "?");
 switch ($route) {
     case '/register':
