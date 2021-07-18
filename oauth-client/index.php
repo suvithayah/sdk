@@ -6,6 +6,8 @@ require_once('OAuth.php');
 require_once('providers/FacebookProvider.php');
 require_once('providers/ServerProvider.php');
 require_once('providers/DiscordProvider.php');
+require_once('providers/GithubProvider.php');
+
 
 /**
  * AUTH CODE WORKFLOW
@@ -31,6 +33,25 @@ switch ($route) {
         break;
     case '/auth-cancel':
         OAuth::handleError();
+        break;
+
+    case '/auth-github':
+        $vars = array(
+            'redirect_uri' => GithubProvider::$redirect_uri,
+            'client_id' => GithubProvider::$client_id,
+            'client_secret' => GithubProvider::$client_secret,
+            'code' =>  $_GET["code"],
+        );
+        GithubProvider::post("https://github.com/login/oauth/access_token", $vars);
+        break;
+    case '/auth-bitly-success':
+            $vars = array(
+                'redirect_uri' => SpotifyProvider::$redirect_uri,
+                'client_id' => SpotifyProvider::$client_id,
+                'client_secret' => SpotifyProvider::$client_secret,
+                'code' =>  $_GET["code"],
+            );
+            SpotifyProvider::post("https://api-ssl.bitly.com/oauth/access_token", $vars);
         break;
     case '/password':
         if ($_SERVER['REQUEST_METHOD'] === "GET") {

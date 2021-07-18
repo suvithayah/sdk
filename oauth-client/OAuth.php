@@ -9,8 +9,12 @@ class OAuth {
         // http://.../auth?response_type=code&client_id=...&scope=...&state=...
         echo "<h1>Login with OAUTH</h1>";
         echo ServerProvider::getPath();
+        echo "<br>";
         echo FacebookProvider::getPath();
+        echo "<br>";
         echo DiscordProvider::getPath();
+        echo "<br>";
+        echo GithubProvider::getPath(); 
     }
 
     // Handle error general
