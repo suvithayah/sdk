@@ -22,7 +22,7 @@ $discordProvider = new OAuth("Discord",
                                     'client_id' => '866400383328321546',
                                     'client_secret' => 'qH1dGLgmQ0aAR_gEXPZVDksRY6KkvxEs',
                                     'grant_type' => 'authorization_code',
-                                    'redirect_uri' => 'https://localhost/authSuccess',
+                                    'redirect_uri' => 'https://localhost/authSuccess-Discord',
                                 ],
                             ]);
 
@@ -42,54 +42,64 @@ $githubProvider = new OAuth(
 
         'accessToken' => [
             'client_id' => '320951b103100045cae5',
-            'client_secret' => '4794afd3d597077da25a980d6aeb0f92a91494b1',
-            'redirect_uri' => 'https://localhost/authSuccess',
+            'client_secret' => 'c9f1d14c4d81c07c64068f443358d45b32caeeb0',
+            'redirect_uri' => 'https://localhost/authSuccess-Github',
+        ],
+
+        'userInfo' => [
+            'User-Agent' => 'request',
+        ],
+    ]
+);
+$facebookProvider = new OAuth(
+    "Facebook",
+    [
+        'oauth' => "https://www.facebook.com/v2.10/dialog/oauth",
+        'accessToken' => "https://graph.facebook.com/oauth/access_token",
+        'accessUserInfo' => "https://graph.facebook.com/me?fields=id,name,email",
+    ],
+    [
+        'oauth' => [
+            'client_id' => '362381462140640',
+            'scope' => 'email',
+            'redirect_uri' => 'https://localhost/authSuccess-Facebook',
+        ],
+
+        'accessToken' => [
+            'grant_type' => 'authorization_code',
+            'client_id' => '362381462140640',
+            'client_secret' => '57ebc1a1f59dd076110c21041d6e1038',
+            'redirect_uri' => 'https://localhost/authSuccess-Facebook',
+        ],
+
+        'userInfo' => [
+            'User-Agent' => 'request',
         ],
     ]
 );
 
-/**
- * AUTH CODE WORKFLOW
- * => Generate link (/login)
- * => Get Code (/auth-success)
- * => Exchange Code <> Token (/auth-success)
- * => Exchange Token <> User info (/auth-success)
- */
-/* switch ($route) {
+$route = strtok($_SERVER["REQUEST_URI"], "?");
+switch ($route) {
 
     case '/login':
-        OAUth::handleLogin();
+        echo "<h1>Veuillez choisir un provider</h1>";
+        $discordProvider->getPathOAuth();
+        $githubProvider->getPathOAuth();
+        $facebookProvider->getPathOAuth();
         break;
-    case '/auth-success':
-        ServerProvider::handleSuccess();
-        break;
-    case '/fbauth-success':
-        FacebookProvider::handleFbSuccess();
-        break;
-    case '/discordAuth-success';
-        DiscordProvider::handleDiscordSuccess();
-        break;
-    case '/auth-cancel':
-        OAuth::handleError();
+    case '/authSuccess-' . $discordProvider->appName :
+        $discordProvider->getAccessToken();
         break;
 
-    case '/auth-github':
-        $vars = array(
-            'redirect_uri' => GithubProvider::$redirect_uri,
-            'client_id' => GithubProvider::$client_id,
-            'client_secret' => GithubProvider::$client_secret,
-            'code' =>  $_GET["code"],
-        );
-        GithubProvider::post("https://github.com/login/oauth/access_token", $vars);
+    case '/authSuccess-' . $githubProvider->appName:
+        $githubProvider->getAccessToken();
         break;
-    case '/auth-bitly-success':
-            $vars = array(
-                'redirect_uri' => SpotifyProvider::$redirect_uri,
-                'client_id' => SpotifyProvider::$client_id,
-                'client_secret' => SpotifyProvider::$client_secret,
-                'code' =>  $_GET["code"],
-            );
-            SpotifyProvider::post("https://api-ssl.bitly.com/oauth/access_token", $vars);
+    case '/authSuccess-' . $facebookProvider->appName:
+        $facebookProvider->getAccessToken();
+        break;
+    case '/auth-success':
+        break;
+    case '/auth-cancel':
         break;
     case '/password':
         if ($_SERVER['REQUEST_METHOD'] === "GET") {
@@ -107,25 +117,6 @@ $githubProvider = new OAuth(
                 "password" => $password
             ]);
         }
-        break;
-    default:
-        http_response_code(404);
-        break;
-} */
-
-$route = strtok($_SERVER["REQUEST_URI"], "?");
-switch ($route) {
-
-    case '/login':
-        $discordProvider->getPathOAuth();
-        $githubProvider->getPathOAuth();
-        break;
-    case '/authSuccess-' . $discordProvider->appName :
-        $discordProvider->getAccessToken();
-        break;
-
-    case '/authSuccess-' . $githubProvider->appName:
-        $githubProvider->getAccessToken();
         break;
     default:
         http_response_code(404);

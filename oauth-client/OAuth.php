@@ -6,11 +6,13 @@ class OAuth {
     public $paths;
     public $appName;
     public $params;
+    public $userInfo;
 
-    public function __construct($appName, $paths, $params){
+    public function __construct($appName, $paths, $params, $userInfo = null){
         $this->paths = $paths;
         $this->appName = $appName;
         $this->params = $params;
+        $this->userInfo = $userInfo;
     }
 
     public function getPathOAuth()
@@ -24,18 +26,11 @@ class OAuth {
        
         $state = $_GET['state'];
         $code = $_GET['code'];
-        echo "<pre>";
-        print_r($this->paths['accessToken']);
-        echo "<br>";
-        print_r($_SESSION['state']);
-        echo "<br>";
-        print_r($state);
 
         if ($state !== $_SESSION['state']) {
             unset($_SESSION['state']);
             throw new RuntimeException("{$state} : invalid state");
         }
-        unset($_SESSION['state']);
 
         $url = $this->paths['accessToken'] . "?";
 
@@ -52,18 +47,31 @@ class OAuth {
 
         $context = stream_context_create($options);
         $result = file_get_contents($url, false, $context);
-
         if ($result === FALSE) {
             http_response_code(404);
+            unset($_SESSION['state']);
+
         } else {
-            $param = json_decode($result);
-            echo "token";
-            print_r("token");
-            $this->getUser($this->paths['accessUserInfo'], $param->access_token);
+
+            if(json_decode($result)){
+                $param = json_decode($result);
+                $token = $param->access_token;
+            }
+            else{
+                $param = [];
+                foreach (explode('&', $result) as $chunk) {
+                    $key = explode("=", $chunk)[0];
+                    $param[$key] = explode("=", $chunk)[1];
+                }
+                $token = $param['access_token'];
+            }
+            $this->getUser($this->paths['accessUserInfo'], $token);
+            unset($_SESSION['state']);
         }
+
     }
 
-    static function getUser($url, $token)
+    function getUser($url, $token)
     {
         //The URL that we want to GET.
         $url = $url;
@@ -72,14 +80,15 @@ class OAuth {
             'http' => [
                 'method' => 'GET',
                 'header' => [
-                    'Authorization: Bearer ' . $token
+                    'Authorization: Bearer ' . $token,
+                    'User-Agent: request'
+
                 ]
             ]
         ]);
 
         //Use file_get_contents to GET the URL in question.
         $contents = file_get_contents($url, false, $context);
-        echo "GetUser";
 
         //If $contents is not a boolean FALSE value.
         if ($contents !== false) {
