@@ -4,8 +4,8 @@ class FacebookProvider {
 
     public $path;
 
-    public static $CLIENT_FBID = "";
-    public static $CLIENT_FBSECRET = "";
+    public static $CLIENT_FBID = "362381462140640";
+    public static $CLIENT_FBSECRET = "57ebc1a1f59dd076110c21041d6e1038";
 
     // path to connect
     public static function getPath()
