@@ -5,8 +5,9 @@ require_once('OAuth.php');
 // Providers
 require_once('providers/FacebookProvider.php');
 require_once('providers/ServerProvider.php');
-require_once('providers/SpotifyProvider.php');
+require_once('providers/DiscordProvider.php');
 require_once('providers/GithubProvider.php');
+
 
 /**
  * AUTH CODE WORKFLOW
@@ -26,6 +27,9 @@ switch ($route) {
         break;
     case '/fbauth-success':
         FacebookProvider::handleFbSuccess();
+        break;
+    case '/discordAuth-success';
+        DiscordProvider::handleDiscordSuccess();
         break;
     case '/auth-cancel':
         OAuth::handleError();
