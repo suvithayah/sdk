@@ -12,7 +12,7 @@ class OAuth {
         echo "<br>";
         echo FacebookProvider::getPath();
         echo "<br>";
-        echo SpotifyProvider::getPath();
+        echo DiscordProvider::getPath();
         echo "<br>";
         echo GithubProvider::getPath(); 
     }
