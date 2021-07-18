@@ -52,6 +52,7 @@ class DiscordProvider {
             http_response_code(404);
         } else {
             $param = json_decode($result);
+            echo $result . '<br>';
             self::getUser("https://discord.com/api/oauth2/@me", $param->access_token);
         }
     }
