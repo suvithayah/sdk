@@ -6,8 +6,8 @@ class GithubProvider {
 
     public static $redirect_uri = "https://localhost/auth-github";
     public static $scope = "";
-    public static $client_id = "";
-    public static $client_secret = "";
+    public static $client_id = "320951b103100045cae5";
+    public static $client_secret = "4794afd3d597077da25a980d6aeb0f92a91494b1";
     public static $link = "https://github.com/login/oauth/authorize";
     public static $scopes = "read:user";
     
